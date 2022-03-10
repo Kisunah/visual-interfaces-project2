@@ -11,22 +11,23 @@ class Map {
     initVis() {
         let vis = this;
 
-        // Map URLs
-        vis.esriUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
-        vis.esriAttr = 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community';
-
         // Initialize the map
-        vis.base_layer = L.tileLayer(vis.esriUrl, {
-            id: 'esri-image',
-            attribution: vis.esriAttr,
-            ext: 'png'
-        });
-
         vis.theMap = L.map('map', {
             center: [30, 0],
-            zoom: 3,
-            layers: [vis.base_layer]
+            zoom: 3
         });
+
+        const defaultLayer = L.tileLayer.provider('Esri.WorldImagery').addTo(vis.theMap);
+
+        vis.baseLayers = {
+            'Satellite': defaultLayer,
+            'Topographical': L.tileLayer.provider('OpenTopoMap'),
+            'Roads': L.tileLayer.provider('OpenStreetMap.Mapnik')
+        };
+
+        vis.layerControl = L.control.layers(this.baseLayers, {} , {
+            collapsed: false
+        }).addTo(vis.theMap);
 
         // Make the map clickable
         L.svg({ clickable: true }).addTo(vis.theMap)
@@ -54,26 +55,26 @@ class Map {
             .attr('cx', d => vis.theMap.latLngToLayerPoint([d['decimalLatitude'], d['decimalLongitude']]).x)
             .attr('cy', d => vis.theMap.latLngToLayerPoint([d['decimalLatitude'], d['decimalLongitude']]).y)
             .attr('r', vis.radiusSize)
-            .on('mouseover', function(event, d) {
+            .on('mouseover', function (event, d) {
                 d3.select(this)
                     .transition()
                     .duration(150)
                     .attr('stroke-width', 2)
                     .attr('r', vis.radiusSize + 1)
                     .style('cursor', 'default')
-                
+
                 d3.select('#tooltip')
                     .style('opacity', 1)
                     .style('z-index', 100000)
                     .html(`<div class="tooltip-label">Name: ${d['genus']} ${d['specificEpithet']}, Year: ${d['year']}</div>`);
-    
+
             })
-            .on('mousemove', function(event) {
+            .on('mousemove', function (event) {
                 d3.select('#tooltip')
                     .style('left', (event.pageX + 10) + 'px')
                     .style('top', (event.pageY + 10) + 'px');
             })
-            .on('mouseleave', function(event) {
+            .on('mouseleave', function (event) {
                 d3.select('#tooltip').style('opacity', 0);
 
                 d3.select(this)
