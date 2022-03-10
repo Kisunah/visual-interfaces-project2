@@ -24,7 +24,7 @@ class Map {
 
         vis.theMap = L.map('map', {
             center: [30, 0],
-            zoom: 2,
+            zoom: 3,
             layers: [vis.base_layer]
         });
 
@@ -40,6 +40,8 @@ class Map {
 
         // Need 2 more color scales, one for startDayFromYear and one for class
 
+        vis.radiusSize = 3;
+
         // Append the specimen dots to the map
         vis.Dots = vis.svg.selectAll('circle')
             .data(vis.data)
@@ -51,7 +53,35 @@ class Map {
             .attr('stroke', 'black')
             .attr('cx', d => vis.theMap.latLngToLayerPoint([d['decimalLatitude'], d['decimalLongitude']]).x)
             .attr('cy', d => vis.theMap.latLngToLayerPoint([d['decimalLatitude'], d['decimalLongitude']]).y)
-            .attr('r', 3);
+            .attr('r', vis.radiusSize)
+            .on('mouseover', function(event, d) {
+                d3.select(this)
+                    .transition()
+                    .duration(150)
+                    .attr('stroke-width', 2)
+                    .attr('r', vis.radiusSize + 1)
+                    .style('cursor', 'default')
+                
+                d3.select('#tooltip')
+                    .style('opacity', 1)
+                    .style('z-index', 100000)
+                    .html(`<div class="tooltip-label">Name: ${d['genus']} ${d['specificEpithet']}, Year: ${d['year']}</div>`);
+    
+            })
+            .on('mousemove', function(event) {
+                d3.select('#tooltip')
+                    .style('left', (event.pageX + 10) + 'px')
+                    .style('top', (event.pageY + 10) + 'px');
+            })
+            .on('mouseleave', function(event) {
+                d3.select('#tooltip').style('opacity', 0);
+
+                d3.select(this)
+                    .transition()
+                    .duration(150)
+                    .attr('stroke-width', 1)
+                    .attr('r', vis.radiusSize)
+            });
 
         vis.theMap.on("zoomend", function () {
             vis.updateVis();
@@ -66,7 +96,12 @@ class Map {
     updateVis() {
         let vis = this;
 
-        vis.radiusSize = 3;
+        vis.zoomLevel = vis.theMap.getZoom();
+
+        // Change the size of the circles based on zoom level
+        if (vis.zoomLevel >= 6) vis.radiusSize = 4;
+        if (vis.zoomLevel >= 8) vis.radiusSize = 5;
+        if (vis.zoomLevel >= 10) vis.radiusSize = 6;
 
         let colorBy = document.getElementById('colorBy').value;
 
@@ -86,6 +121,6 @@ class Map {
             })
             .attr('cx', d => vis.theMap.latLngToLayerPoint([d['decimalLatitude'], d['decimalLongitude']]).x)
             .attr('cy', d => vis.theMap.latLngToLayerPoint([d['decimalLatitude'], d['decimalLongitude']]).y)
-            .attr('r', 3);
+            .attr('r', vis.radiusSize);
     }
 }
