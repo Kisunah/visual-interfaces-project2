@@ -36,7 +36,7 @@ class Map {
 
         // Initialize the color scales
         vis.yearColorScale = d3.scaleSequential()
-            .interpolator(d3.interpolateRdGy)
+            .interpolator(d3.interpolateRdBu)
             .domain([d3.min(vis.data, d => parseInt(d['year'])), d3.max(vis.data, d => parseInt(d['year']))]);
 
         // Need 2 more color scales, one for startDayFromYear and one for class
@@ -49,6 +49,7 @@ class Map {
             .join('circle')
             .attr('fill', (d) => {
                 if (d['year'] == 'null') return 'black';
+                vis.colorBy = 'year';
                 return vis.yearColorScale(parseInt(d['year']));
             })
             .attr('stroke', 'black')
@@ -88,9 +89,11 @@ class Map {
             vis.updateVis();
         });
 
-        // Handles the change event of the select object to choose how the dots are colored
-        document.getElementById('colorBy').addEventListener('change', (event) => {
-            vis.updateVis();
+        document.querySelectorAll('input[name="colorScale"]').forEach((elem) => {
+            elem.addEventListener('click', (event) => {
+                vis.colorBy = event.target.value;
+                vis.updateVis();
+            });
         });
     }
 
@@ -102,21 +105,19 @@ class Map {
         // Change the size of the circles based on zoom level
         if (vis.zoomLevel >= 6) vis.radiusSize = 4;
         if (vis.zoomLevel >= 8) vis.radiusSize = 5;
-        if (vis.zoomLevel >= 10) vis.radiusSize = 6;
-
-        let colorBy = document.getElementById('colorBy').value;
+        if (vis.zoomLevel >= 10) vis.radiusSize = 6;        
 
         // Rerenders the dots on a zoom or change select event
         vis.Dots
             .attr('fill', (d) => {
-                if (colorBy == 'year') {
+                if (vis.colorBy == 'year') {
                     if (d['year'] == 'null') return 'black';
                     return vis.yearColorScale(parseInt(d['year']));
                 }
-                else if (colorBy == 'startDay') {
+                else if (vis.colorBy == 'startDay') {
                     return 'red'; // Needs to change to a new color scale
                 }
-                else if (colorBy == 'class') {
+                else if (vis.colorBy == 'class') {
                     return 'green'; // Needs to change to a new color scale
                 }
             })

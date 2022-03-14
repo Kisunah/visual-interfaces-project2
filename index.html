@@ -14,11 +14,14 @@
     <div id="map"></div>
     <div id="tooltip"></div>
 
-    <select id="colorBy">
-        <option value="year">Year</option>
-        <option value="startDay">Start Day of Year</option>
-        <option value="class">Class</option>
-    </select>
+    <div id="buttonContainer">
+        <input type="radio" id="yearButton" name="colorScale" value="year" checked>
+        <label for="yearButton">Year</label>
+        <input type="radio" id="startDayButton" name="colorScale" value="startDay">
+        <label for="startDayButton">Start Day of Year</label>
+        <input type="radio" id="classButton" name="colorScale" value="class">
+        <label for="classButton">Class</label>
+    </div>
 
     <script src="js/d3.v6.min.js"></script>
     <script src="js/leaflet.js"></script>
