@@ -105,7 +105,8 @@ class Map {
         // Change the size of the circles based on zoom level
         if (vis.zoomLevel >= 6) vis.radiusSize = 4;
         if (vis.zoomLevel >= 8) vis.radiusSize = 5;
-        if (vis.zoomLevel >= 10) vis.radiusSize = 6;        
+        if (vis.zoomLevel >= 10) vis.radiusSize = 6;
+        if (vis.zoomLevel < 6) vis.radiusSize = 3;    
 
         // Rerenders the dots on a zoom or change select event
         vis.Dots
