@@ -11,16 +11,20 @@
 </head>
 
 <body>
-    <div id="map"></div>
-    <div id="tooltip"></div>
-
-    <div id="buttonContainer">
-        <input type="radio" id="yearButton" name="colorScale" value="year" checked>
-        <label for="yearButton">Year</label>
-        <input type="radio" id="startDayButton" name="colorScale" value="startDay">
-        <label for="startDayButton">Start Day of Year</label>
-        <input type="radio" id="classButton" name="colorScale" value="class">
-        <label for="classButton">Class</label>
+    <div id="mapContainer" class="mapContainer">
+        <div id="map"></div>
+        <div id="tooltip"></div>
+        <div class="infoContainer">
+            <div id="buttonContainer">
+                <input type="radio" id="yearButton" name="colorScale" value="year" checked>
+                <label for="yearButton">Year</label><br>
+                <input type="radio" id="startDayButton" name="colorScale" value="startDay">
+                <label for="startDayButton">Start Day of Year</label><br>
+                <input type="radio" id="classButton" name="colorScale" value="class">
+                <label for="classButton">Class</label>
+            </div>
+            <svg id="mapLegend" class="legend"></svg>
+        </div>
     </div>
 
     <script src="js/d3.v6.min.js"></script>

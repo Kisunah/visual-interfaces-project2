@@ -20,6 +20,6 @@ d3.csv('data/formatted.csv')
         console.log(data);
 
         // Creates the map
-        let map = new Map({parentElement: '#map'}, data);
+        let map = new SpecimenMap({parentElement: '#map'}, data);
     })
     .catch(err => console.error(err));
