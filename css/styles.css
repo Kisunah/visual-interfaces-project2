@@ -16,6 +16,36 @@
     width: 25%;
 }
 
+.buttonContainer {
+    display: flex;
+    justify-content: space-around;
+}
+
+.button {
+    padding: 10px;
+}
+
+.button:hover {
+    cursor: pointer;
+}
+
+.button label:hover {
+    cursor: pointer;
+}
+
+.button input:hover {
+    cursor: pointer;
+}
+
+#mapLegend {
+    max-width: 90%;
+}
+
+#missingPoints {
+    font-weight: bold;
+    text-align: center;
+}
+
 #tooltip {
     position: absolute;
     opacity: 0;

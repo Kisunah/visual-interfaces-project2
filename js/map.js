@@ -44,9 +44,7 @@ class SpecimenMap {
 
         vis.phylumColorScale = d3.scaleOrdinal(d3.schemeSet1)
             .domain(['Myxomycota', 'Ascomycota', 'Amoebozoa', 'Basidiomycota', 'Chytridiomycota', 'Zygomycota', 'Oomycota', 'Blastocladiomycota'])
-            .range(['#e41a1c', '#377eb8', '#4daf4a', '#984ea3', '#ff7f00', '#ffff33', '#a65628', '#f781bf', '#000000'])
-
-        // Need 2 more color scales, one for startDayFromYear and one for class
+            .range(['#e41a1c', '#377eb8', '#4daf4a', '#984ea3', '#ff7f00', '#ffff33', '#a65628', '#f781bf', '#000000']);
 
         vis.radiusSize = 3;
 
@@ -188,8 +186,6 @@ class SpecimenMap {
 
         let phylum = vis.phylumColorScale.domain();
         phylum.forEach((item, index) => {
-            console.log(item);
-
             if (item != 'null') {
                 vis.ordinalRects.append('rect')
                     .style('fill', vis.phylumColorScale(item))
@@ -225,7 +221,7 @@ class SpecimenMap {
                 else if (vis.colorBy == 'startDay') {
                     return vis.dayColorScale(parseInt(d['startDayOfYear']));
                 }
-                else if (vis.colorBy == 'class') {
+                else if (vis.colorBy == 'phylum') {
                     return vis.phylumColorScale(d['phylum']);
                 }
             })
@@ -255,8 +251,8 @@ class SpecimenMap {
 
             d3.select('#phylumLegend')
                 .style('visibility', 'hidden');
-        } else if (vis.colorBy == 'class') {
-            vis.legend.attr('height', 500);
+        } else if (vis.colorBy == 'phylum') {
+            vis.legend.attr('height', 200);
 
             d3.select('#yearLegend')
                 .style('visibility', 'hidden');

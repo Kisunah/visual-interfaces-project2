@@ -15,15 +15,25 @@
         <div id="map"></div>
         <div id="tooltip"></div>
         <div class="infoContainer">
-            <div id="buttonContainer">
-                <input type="radio" id="yearButton" name="colorScale" value="year" checked>
-                <label for="yearButton">Year</label><br>
-                <input type="radio" id="startDayButton" name="colorScale" value="startDay">
-                <label for="startDayButton">Start Day of Year</label><br>
-                <input type="radio" id="classButton" name="colorScale" value="class">
-                <label for="classButton">Class</label>
+            <div id="buttonContainer" class="buttonContainer">
+                <label class="button">
+                    <input type="radio" name="colorScale" value="year" id="yearButton" checked>
+                    <span>Year</span>
+                </label>
+
+                <label class="button">
+                    <input type="radio" name="colorScale" value="startDay" id="startDayButton">
+                    <span>Start Day of Year</span>
+                </label>
+
+                <label class="button">
+                    <input type="radio" name="colorScale" value="phylum" id="classButton">
+                    <span>Phylum</span>
+                </label>
             </div>
             <svg id="mapLegend" class="legend"></svg>
+
+            <p id="missingPoints"></p>
         </div>
     </div>
 
