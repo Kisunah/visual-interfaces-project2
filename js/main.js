@@ -18,7 +18,7 @@ d3.csv('data/formatted.csv')
         });
 
         let missingPoints = document.getElementById('missingPoints');
-        missingPoints.innerText = `*There are ${numWithoutCoords} entries without GPS coordinates`;
+        missingPoints.innerText = `*There are ${numWithoutCoords} specimens without GPS coordinates\n*Not all specimens have complete data points, resulting in null values`;
 
         // Creates the map
         let map = new SpecimenMap({parentElement: '#map'}, data);

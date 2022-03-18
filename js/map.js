@@ -72,7 +72,7 @@ class SpecimenMap {
                 d3.select('#tooltip')
                     .style('opacity', 1)
                     .style('z-index', 100000)
-                    .html(`<div class="tooltip-label">Name: ${d['genus']} ${d['specificEpithet']}, Year: ${d['year']}</div>`);
+                    .html(`<div class="tooltip-label">Name: ${d['genus']} ${d['specificEpithet']}<br>Year: ${d['year']}<br>Recorded By: ${d['recordedBy']}<br>Classification: ${d['higherClassification']}<br>Habitat Notes: ${d['habitat']}<br>Substrate Notes: ${d['substrate']}</div>`);
 
             })
             .on('mousemove', function (event) {
@@ -81,13 +81,19 @@ class SpecimenMap {
                     .style('top', (event.pageY + 10) + 'px');
             })
             .on('mouseleave', function (event) {
-                d3.select('#tooltip').style('opacity', 0);
+                d3.select('#tooltip')
+                    .style('left', 0)
+                    .style('top', 0)
+                    .style('opacity', 0);
 
                 d3.select(this)
                     .transition()
                     .duration(150)
                     .attr('stroke-width', 1)
                     .attr('r', vis.radiusSize)
+            })
+            .on('click', function(event, d) {
+                window.open(d['references']);
             });
 
         vis.theMap.on("zoomend", function () {
