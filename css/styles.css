@@ -46,7 +46,7 @@
     text-align: center;
 }
 
-#tooltip {
+.tooltip {
     position: absolute;
     opacity: 0;
     background: #ffffff;

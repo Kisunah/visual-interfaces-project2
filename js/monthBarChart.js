@@ -68,7 +68,37 @@ class monthBarChart {
             .attr('pointer-events', 'all')
             .attr('transform', `translate(${vis.config.margin.left}, ${vis.config.margin.top})`)
             .attr('fill', 'red')
-            .attr('height', d => vis.height - vis.yScale(d.count));
+            .attr('height', d => vis.height - vis.yScale(d.count))
+            .on('mouseover', function(event, d) {
+                d3.select(this)
+                    .transition()
+                    .duration(150)
+                    .attr('stroke', 'black')
+                    .attr('stroke-width', 2)
+                    .style('cursor', 'pointer');
+
+                d3.select('#monthTooltip')
+                    .style('opacity', 1)
+                    .style('z-index', 100000)
+                    .html(`<div class="tooltip-label">Name: ${d.month}<br>Count: ${d.count}</div>`)
+            })
+            .on('mousemove', function (event) {
+                d3.select('#monthTooltip')
+                    .style('left', (event.pageX + 10) + 'px')
+                    .style('top', (event.pageY + 10) + 'px');
+            })
+            .on('mouseleave', function(event, d) {
+                d3.select(this)
+                    .transition()
+                    .duration(150)
+                    .attr('stroke-width', 0)
+                    .style('cursor', 'default');
+
+                d3.select('#monthTooltip')
+                    .style('left', 0)
+                    .style('top', 0)
+                    .style('opacity', 0);
+            });            
 
 
         vis.xAxisG.call(vis.xAxis)
