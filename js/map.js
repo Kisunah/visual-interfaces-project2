@@ -15,7 +15,7 @@ class SpecimenMap {
         // Initialize the map
         vis.theMap = L.map('map', {
             center: [30, 0],
-            zoom: 3
+            zoom: 2
         });
 
         const defaultLayer = L.tileLayer.provider('Esri.WorldImagery').addTo(vis.theMap);

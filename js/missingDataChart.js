@@ -1,4 +1,4 @@
-class monthBarChart {
+class missingDataChart {
     constructor(_config, _data) {
         this.config = {
             parentElement: _config.parentElement,
@@ -50,8 +50,8 @@ class monthBarChart {
     updateVis() {
         let vis = this;
 
-        vis.xScale.domain(vis.data.map(d => d.month));
-        vis.yScale.domain([0, d3.max(vis.data, d => d.count)]);
+        vis.xScale.domain(vis.data.map(d => d.field));
+        vis.yScale.domain([0, 100]);
 
         vis.renderVis();
     }
@@ -62,13 +62,13 @@ class monthBarChart {
         const bar = vis.svg.selectAll('rect')
             .data(vis.data)
             .join('rect')
+            .attr('x', d => vis.xScale(d.field))
+            .attr('y', d => vis.yScale(d.missing))
+            .attr('height', d => vis.height - vis.yScale(d.missing))
             .attr('width', vis.xScale.bandwidth())
-            .attr('x', d => vis.xScale(d.month))
-            .attr('y', d => vis.yScale(d.count))
             .attr('pointer-events', 'all')
             .attr('transform', `translate(${vis.config.margin.left}, ${vis.config.margin.top})`)
-            .attr('fill', 'red')
-            .attr('height', d => vis.height - vis.yScale(d.count))
+            .attr('fill', 'green')
             .on('mouseover', function(event, d) {
                 d3.select(this)
                     .transition()
@@ -80,7 +80,7 @@ class monthBarChart {
                 d3.select('#monthTooltip')
                     .style('opacity', 1)
                     .style('z-index', 100000)
-                    .html(`<div class="tooltip-label">Name: ${d.month}<br>Count: ${d.count}</div>`)
+                    .html(`<div class="tooltip-label">Name: ${d.field}<br>Total Specimens: ${d.totalSpecimens}<br>Missing: ${d.missing}<br>Existing: ${d.existing}</div>`)
             })
             .on('mousemove', function (event) {
                 d3.select('#monthTooltip')
@@ -98,13 +98,11 @@ class monthBarChart {
                     .style('left', 0)
                     .style('top', 0)
                     .style('opacity', 0);
-            });    
+            });
 
 
         vis.xAxisG.call(vis.xAxis)
             .selectAll('text')
-                .attr('transform', 'rotate(-45)')
-                .style('text-anchor', 'end')
                 .style('font-weight', 'bold')
         vis.yAxisG.call(vis.yAxis);
     }

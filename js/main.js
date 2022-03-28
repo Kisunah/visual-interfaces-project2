@@ -108,5 +108,38 @@ d3.csv('data/formatted.csv')
         collectorData = collectorData.slice(0, 10);
 
         let collectorChart = new collectorBarChart({ parentElement: '#collectorBarChart' }, collectorData);
+
+        // Logic for creating the chart that shows the total missing data specimens
+        let gpsObject = {
+            field: 'GPS Coordinates',
+            totalSpecimens: 0,
+            missing: 0,
+            existing: 0
+        };
+
+        let dateObject = {
+            field: 'Date',
+            totalSpecimens: 0,
+            missing: 0,
+            existing: 0
+        };
+        data.forEach((item) => {
+            if (item['decimalLatitude'] == 999 || item['decimalLongitude'] == 999) {
+                gpsObject.missing += 1;
+            } else {
+                gpsObject.existing += 1;
+            }
+
+            if (item['eventDate'] == 'null') {
+                dateObject.missing += 1;
+            } else {
+                dateObject.existing += 1;
+            }
+        });
+        gpsObject.totalSpecimens = gpsObject.existing + gpsObject.missing;
+        dateObject.totalSpecimens = dateObject.existing + dateObject.missing;
+        let missingData = [gpsObject, dateObject];
+
+        let missingChart = new missingDataChart({ parentElement: '#missingDataChart' }, missingData);
     })
     .catch(err => console.error(err));
