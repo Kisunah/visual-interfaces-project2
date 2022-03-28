@@ -3,7 +3,7 @@ class missingDataChart {
         this.config = {
             parentElement: _config.parentElement,
             containerWidth: _config.containerWidth || 500,
-            containerHeight: _config.containerHeight || 300,
+            containerHeight: _config.containerHeight || 350,
             margin: { top: 50, right: 50, bottom: 50, left: 50 }
         }
 

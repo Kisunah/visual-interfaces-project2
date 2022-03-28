@@ -63,10 +63,7 @@
     color: #888888;
 }
 
-.existing rect {
-    fill: blue;
-}
-
-.missing rect {
-    fill: red;
+#chartContainer {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
 }
