@@ -31,7 +31,6 @@ d3.csv('data/formatted.csv')
             years.push(i);
         }
 
-        /*
         let timelineData = [];
         years.forEach((year) => {
             let count = 0;
@@ -45,8 +44,7 @@ d3.csv('data/formatted.csv')
             timelineData.push(obj);
         });
 
-        let timeline = new Timeline({ parentElement: "#timeline" }, timelineData);
-        */
+        let timeline = new Timeline({ parentElement: "#timeline" }, timelineData);        
 
         // Logic for creating the specimens collected by month bar chart
         let monthlyData = [];

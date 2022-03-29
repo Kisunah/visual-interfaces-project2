@@ -1,26 +1,33 @@
 class Timeline {
     constructor(_config, _data) {
-        let width = document.getElementById('map').offsetWidth;
-
         this.config = {
             parentElement: _config.parentElement,
-            width: width,
-            height: 120
-        };
+            width: 2000,
+            height: 240,
+            contextHeight: 50,
+            margin: { top: 10, right: 10, bottom: 100, left: 45 },
+            contextMargin: { top: 280, right: 10, bottom: 20, left: 45 }
+        }
 
         this.data = _data;
+
         this.initVis();
     }
 
     initVis() {
         let vis = this;
 
+        const containerWidth = vis.config.width + vis.config.margin.left + vis.config.margin.right;
+        const containerHeight = vis.config.height + vis.config.margin.top + vis.config.margin.bottom;
+
+        vis.height = containerHeight;
+
         vis.xScaleFocus = d3.scaleBand()
-            .padding(0.2)
+            .padding(0.1)
             .range([0, vis.config.width]);
 
         vis.xScaleContext = d3.scaleBand()
-            .padding(0.2)
+            .padding(0.1)
             .range([0, vis.config.width]);
 
         vis.yScaleFocus = d3.scaleLinear()
@@ -28,22 +35,50 @@ class Timeline {
             .nice();
 
         vis.yScaleContext = d3.scaleLinear()
-            .range([vis.config.height, 0])
+            .range([vis.config.contextHeight, 0])
             .nice();
 
+        // Initialize axes
         vis.xAxisFocus = d3.axisBottom(vis.xScaleFocus).tickSizeOuter(0);
         vis.xAxisContext = d3.axisBottom(vis.xScaleContext).tickSizeOuter(0);
         vis.yAxisFocus = d3.axisLeft(vis.yScaleFocus);
 
+        // Define size of SVG drawing area
         vis.svg = d3.select(vis.config.parentElement)
+            .attr('width', containerWidth)
+            .attr('height', containerHeight);
+
+        // Append focus group with x- and y-axes
+        vis.focus = vis.svg.append('g')
+            .attr('transform', `translate(${vis.config.margin.left},${vis.config.margin.top})`);
+
+        vis.focus.append('defs').append('clipPath')
+            .attr('id', 'clip')
+            .append('rect')
             .attr('width', vis.config.width)
             .attr('height', vis.config.height);
 
+        vis.xAxisFocusG = vis.focus.append('g')
+            .attr('class', 'axis x-axis')
+            .attr('transform', `translate(0,${vis.config.height})`);
+
+        vis.yAxisFocusG = vis.focus.append('g')
+            .attr('class', 'axis y-axis');
+
+        // Append context group with x- and y-axes
         vis.context = vis.svg.append('g')
-            .attr('id', 'contextGroup');
+            .attr('transform', `translate(${vis.config.contextMargin.left},${vis.config.contextMargin.top})`);
 
-        vis.brushG = vis.context.append('g');
+        vis.xAxisContextG = vis.context.append('g')
+            .attr('class', 'axis x-axis')
+            .attr('transform', `translate(0,${vis.config.contextHeight})`);
 
+        vis.brushG = vis.context.append('g')
+            .attr('width', 2000)
+            .attr('class', 'brush x-brush');
+
+
+        // Initialize brush component
         vis.brush = d3.brushX()
             .extent([[0, 0], [vis.config.width, vis.config.contextHeight]])
             .on('brush', function ({ selection }) {
@@ -53,34 +88,30 @@ class Timeline {
                 if (!selection) vis.brushed(null);
             });
 
-        vis.focus = vis.svg.append('g')
-            .attr('id', 'focusGroup');
-
-        vis.focus.append('defs')
-            .append('clipPath')
-            .attr('id', 'clip')
-            .append('rect')
-            .attr('width', vis.config.width)
-            .attr('height', vis.config.height);
-
         vis.updateVis();
     }
 
     updateVis() {
         let vis = this;
 
-        let minYear = d3.min(vis.data, d => d['year']);
-        let maxYear = d3.max(vis.data, d => d['year']);
+        vis.xValue = d => d.year;
+        vis.yValue = d => d.specimenCount;
 
-        let years = [];
-        for (let i = minYear; i < maxYear + 1; i++) {
-            years.push(i);
-        }
+        // Initialize line and area generators
+        vis.line = d3.line()
+            .x(d => vis.xScaleFocus(vis.xValue(d)))
+            .y(d => vis.yScaleFocus(vis.yValue(d)));
 
-        vis.xScaleContext.domain(years);
-        vis.xScaleFocus.domain(years);
+        vis.area = d3.area()
+            .x(d => vis.xScaleContext(vis.xValue(d)))
+            .y1(d => vis.yScaleContext(vis.yValue(d)))
+            .y0(vis.config.contextHeight);
 
-        vis.yScaleContext.domain([0, d3.max(vis.data, d => d['specimenCount'])]);
+        // Set the scale input domains
+        vis.xScaleFocus.domain(vis.data.map(d => d.year));
+        vis.yScaleFocus.domain([0, d3.max(vis.data, d => d.specimenCount)]);
+        vis.xScaleContext.domain(vis.xScaleFocus.domain());
+        vis.yScaleContext.domain(vis.yScaleFocus.domain());
 
         vis.renderVis();
     }
@@ -88,22 +119,51 @@ class Timeline {
     renderVis() {
         let vis = this;
 
-        const contextBar = vis.context.selectAll('rect')
+        vis.contextBar = vis.brushG.selectAll('rect')
             .data(vis.data)
             .join('rect')
-            .attr('x', d => vis.xScaleContext(parseInt(d['year'])))
-            .attr('y', 0)
-            .attr('fill', 'blue')
             .attr('width', vis.xScaleContext.bandwidth())
-            .attr('height', d => vis.config.height - vis.yScaleContext(parseInt(d['specimenCount'])));
+            .attr('height', d => 50 - vis.yScaleContext(d.specimenCount))
+            .attr('x', d => vis.xScaleContext(d.year))
+            .attr('y', d => vis.yScaleContext(d.specimenCount))
+            .attr('fill', 'grey');
 
-        const defaultBrushSelection = [0, vis.xScaleContext.range()[1]];
-        vis.brushG
-            .call(vis.brush)
-            .call(vis.brush.move, defaultBrushSelection);
+        vis.focusBar = vis.focus.selectAll('rect')
+            .data(vis.data)
+            .join('rect')
+            .attr('width', vis.xScaleFocus.bandwidth())
+            .attr('height', d => vis.height - vis.config.margin.top - vis.config.margin.bottom - vis.yScaleFocus(d.specimenCount))
+            .attr('x', d => vis.xScaleFocus(d.year))
+            .attr('y', d => vis.yScaleFocus(d.specimenCount))
+            .attr('fill', 'black');
+
+        vis.xAxisFocusG.call(vis.xAxisFocus);
+
+        vis.brushG.call(vis.brush);
     }
 
     brushed(selection) {
+        let vis = this;
 
+        if (selection) {
+            let eachBand = vis.xScaleContext.step();
+            let index1 = Math.floor(selection[0] / eachBand);
+            let year1 = vis.xScaleContext.domain()[index1];
+            let index2 = Math.floor(selection[1] / eachBand) - 1;
+            let year2 = vis.xScaleContext.domain()[index2];
+
+            let newDomain = [];
+            for (let i = year1; i <= year2; i++) {
+                newDomain.push(i);
+            }
+
+            vis.xScaleFocus.domain(newDomain);
+        } else {
+            vis.xScaleFocus.domain(vis.xScaleContext.domain());
+        }
+
+        vis.xAxisFocusG.call(vis.xAxisFocus);
+
+        vis.focusBar.attr('x', d => vis.xScaleFocus(d.year));
     }
 }
