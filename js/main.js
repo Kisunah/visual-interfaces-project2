@@ -160,6 +160,20 @@ d3.csv('data/formatted.csv')
             collectorChart.updateChart(collectorData);
             missingChart.updateChart(missingData);
         });
+
+        document.addEventListener('phylumFilter', (event) => {
+            filters.phyla = event.detail;
+
+            let mapData = prepareMapData(data, filters);
+            let monthData = prepareMonthData(data, filters);
+            let collectorData = prepareRecorderData(data, filters);
+            let missingData = prepareMissingData(data, filters);
+
+            map.updateChart(mapData);
+            monthChart.updateChart(monthData);
+            collectorChart.updateChart(collectorData);
+            missingChart.updateChart(missingData);
+        })
     })
     .catch(err => console.error(err));
 
@@ -171,18 +185,59 @@ function prepareMapData(data, filters) {
         return false;
     }
 
+    function filterByPhylum(item) {
+        if (filters.phyla.indexOf(item['phylum']) != -1) {
+            return true;
+        }
+        return false;
+    }
+
     let mapData = data;
 
     if (filters.months.length > 0) mapData = mapData.filter(filterByMonth);
-    // mapData.forEach((item, idx) => {
-    //     if (filters.months.length > 0 && filters.months.indexOf(item['month']) == -1) {
-    //         mapData.splice(idx, 1);
-    //     } else {
-    //         console.log(item['month']);
-    //     }
-    // });
+    if (filters.phyla.length > 0) mapData = mapData.filter(filterByPhylum);
 
     return mapData;
+}
+
+function prepareMonthData(data, filters) {
+    let monthlyData = [];
+    let months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    let monthMap = {
+        'January': '1',
+        'February': '2',
+        'March': '3',
+        'April': '4', 
+        'May': '5',
+        'June': '6',
+        'July': '7',
+        'August': '8',
+        'September': '9',
+        'October': '10',
+        'November': '11',
+        'December': '12'
+    };
+
+    months.forEach((month, idx) => {
+        let obj = {
+            month: month,
+            count: 0
+        };
+        data.forEach((item) => {
+            if (parseInt(item['month']) == idx + 1) obj.count += 1;
+        });
+        monthlyData.push(obj);
+    });
+
+    monthlyData.forEach((month) => {
+        data.forEach((item) => {
+            if (item['month'] == monthMap[month.month] && filters.phyla.length > 0 && filters.phyla.indexOf(item['phylum']) == -1) {
+                month.count -= 1;
+            }
+        });
+    });
+
+    return monthlyData;
 }
 
 function preparePhylumData(data, filters) {
@@ -200,11 +255,13 @@ function preparePhylumData(data, filters) {
         phylumData.push(obj);
     });
 
-    phylumData.forEach((phyla) => {
-        data.forEach((item) => {
-            if (item['phylum'] == phyla.phylum && filters.months.length > 0 && filters.months.indexOf(item['month']) == -1) phyla.count -= 1;
+    if (filters.months.length > 0) {
+        phylumData.forEach((phyla) => {
+            data.forEach((item) => {
+                if (item['phylum'] == phyla.phylum && filters.months.indexOf(item['month']) == -1) phyla.count -= 1;
+            });
         });
-    });
+    }
 
     return phylumData;
 }
@@ -234,11 +291,21 @@ function prepareRecorderData(data, filters) {
     });
     collectorData = collectorData.slice(0, 10);
 
-    collectorData.forEach((collector) => {
-        data.forEach((item) => {
-            if (item['recordedBy'] == collector.collector && filters.months.length > 0 && filters.months.indexOf(item['month']) == -1) collector.count -= 1;
+    if (filters.months.length > 0) {
+        collectorData.forEach((collector) => {
+            data.forEach((item) => {
+                if (item['recordedBy'] == collector.collector && filters.months.indexOf(item['month']) == -1) collector.count -= 1;
+            });
         });
-    });
+    }
+
+    if (filters.phyla.length > 0) {
+        collectorData.forEach((collector) => {
+            data.forEach((item) => {
+                if (item['recordedBy'] == collector.collector && filters.phyla.indexOf(item['phylum']) == -1) collector.count -= 1;
+            });
+        });
+    }
 
     return collectorData;
 }
@@ -274,34 +341,67 @@ function prepareMissingData(data, filters) {
     dateObject.totalSpecimens = dateObject.existing + dateObject.missing;
     let missingData = [gpsObject, dateObject];
 
-    missingData.forEach((missing) => {
-        data.forEach((item) => {
-            if (missing.field == 'GPS Coordinates') {
-                if (item['decimalLatitude'] == 999 || item['decimalLongitude'] == 999) {
-                    if (filters.months.length > 0 && filters.months.indexOf(item['month']) == -1) {
-                        missing.missing -= 1;
-                    }
-                } else {
-                    if (filters.months.length > 0 && filters.months.indexOf(item['month']) == -1) {
-                        missing.existing -= 1;
-                    }
-                }
-            }
-
-            if (missing.field == 'Date') {
-                if (item['eventDate'] == 'null') {
-                    if (filters.months.length > 0 && filters.months.indexOf(item['month']) == -1) {
-                        missing.missing -= 1;
-                    }
-                } else {
-                    if (filters.months.length > 0 && filters.months.indexOf(item['month']) == -1) {
-                        missing.existing -= 1;
+    if (filters.months.length > 0) {
+        missingData.forEach((missing) => {
+            data.forEach((item) => {
+                if (missing.field == 'GPS Coordinates') {
+                    if (item['decimalLatitude'] == 999 || item['decimalLongitude'] == 999) {
+                        if (filters.months.indexOf(item['month']) == -1) {
+                            missing.missing -= 1;
+                        }
+                    } else {
+                        if (filters.months.indexOf(item['month']) == -1) {
+                            missing.existing -= 1;
+                        }
                     }
                 }
-            }
+    
+                if (missing.field == 'Date') {
+                    if (item['eventDate'] == 'null') {
+                        if (filters.months.indexOf(item['month']) == -1) {
+                            missing.missing -= 1;
+                        }
+                    } else {
+                        if (filters.months.indexOf(item['month']) == -1) {
+                            missing.existing -= 1;
+                        }
+                    }
+                }
+            });
+            missing.totalSpecimens = missing.missing + missing.existing;
         });
-        missing.totalSpecimens = missing.missing + missing.existing;
-    });
+    }
+
+    if(filters.phyla.length > 0) {
+        missingData.forEach((missing) => {
+            data.forEach((item) => {
+                if (missing.field == 'GPS Coordinates') {
+                    if (item['decimalLatitude'] == 999 || item['decimalLongitude'] == 999) {
+                        if (filters.phyla.indexOf(item['phylum']) == -1) {
+                            missing.missing -= 1;
+                        }
+                    } else {
+                        if (filters.phyla.indexOf(item['phylum']) == -1) {
+                            missing.existing -= 1;
+                        }
+                    }
+                }
+    
+                if (missing.field == 'Date') {
+                    if (item['eventDate'] == 'null') {
+                        if (filters.phyla.indexOf(item['phylum']) == -1) {
+                            missing.missing -= 1;
+                        }
+                    } else {
+                        if (filters.phyla.indexOf(item['phylum']) == -1) {
+                            missing.existing -= 1;
+                        }
+                    }
+                }
+            });
+            missing.totalSpecimens = missing.missing + missing.existing;
+        });
+    }
 
     return missingData;
 }

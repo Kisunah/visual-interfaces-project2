@@ -68,6 +68,7 @@ class phylumBarChart {
             .attr('pointer-events', 'all')
             .attr('transform', `translate(${vis.config.margin.left}, ${vis.config.margin.top})`)
             .attr('fill', 'blue')
+            .attr('class', 'off')
             .attr('height', d => vis.height - vis.yScale(d.count))
             .on('mouseover', function (event, d) {
                 d3.select(this)
@@ -98,6 +99,23 @@ class phylumBarChart {
                     .style('left', 0)
                     .style('top', 0)
                     .style('opacity', 0);
+            })
+            .on('click', function () {
+                const bar = d3.select(this);
+                if (bar.attr('class') == 'off') {
+                    bar.attr('class', 'on');
+                } else {
+                    bar.attr('class', 'off');
+                }
+
+                let selectedPhyla = [];
+
+                d3.selectAll('.on')._groups[0].forEach((item) => {
+                    selectedPhyla.push(item.__data__.phylum);
+                });
+
+                const event = new CustomEvent('phylumFilter', {detail: selectedPhyla});
+                document.dispatchEvent(event);
             });
 
 

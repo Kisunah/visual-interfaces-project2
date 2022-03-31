@@ -142,5 +142,11 @@ class monthBarChart {
 
     updateChart(newData) {
         let vis = this;
+
+        vis.svg.selectAll('rect')
+            .data(newData)
+            .transition().duration(1000)
+            .attr('y', d => vis.yScale(d.count))
+            .attr('height', d => vis.height - vis.yScale(d.count));
     }
 }

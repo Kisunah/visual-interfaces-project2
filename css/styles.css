@@ -77,7 +77,4 @@
     stroke-width: 2;
 }
 
-.off {
-    stroke: none;
-    stroke-width: 0;
-}
+.off {}
