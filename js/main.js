@@ -188,6 +188,20 @@ d3.csv('data/formatted.csv')
             phylumChart.updateChart(phylumData);
             missingChart.updateChart(missingData);
         });
+
+        document.addEventListener('missingFilter', (event) => {
+            filters.missingData = event.detail;
+
+            let mapData = prepareMapData(data, filters);
+            let monthData = prepareMonthData(data, filters);
+            let phylumData = preparePhylumData(data, filters);
+            let collectorData = prepareRecorderData(data, filters);
+            
+            map.updateChart(mapData);
+            monthChart.updateChart(monthData);
+            phylumChart.updateChart(phylumData);
+            collectorChart.updateChart(collectorData);
+        });
     })
     .catch(err => console.error(err));
 
@@ -213,11 +227,28 @@ function prepareMapData(data, filters) {
         return false;
     }
 
+    function filterByMissing(item) {
+        if (filters.missingData.indexOf('GPS Coordinates') != -1) {
+            if (item['decimalLatitude'] == 999 || item['decimalLongitude'] == 999) {
+                return true;
+            }
+        }
+
+        if (filters.missingData.indexOf('Date') != -1) {
+            if (item['eventDate'] == 'null') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     let mapData = data;
 
     if (filters.months.length > 0) mapData = mapData.filter(filterByMonth);
     if (filters.phyla.length > 0) mapData = mapData.filter(filterByPhylum);
     if (filters.collectors.length > 0) mapData = mapData.filter(filterByCollector);
+    if (filters.missingData.length > 0) mapData = mapData.filter(filterByMissing);
 
     return mapData;
 }
@@ -271,6 +302,27 @@ function prepareMonthData(data, filters) {
         });
     }
 
+    if (filters.missingData.length > 0) {
+        monthlyData.forEach((month) => {
+            data.forEach((item) => {
+                let flag = false;
+                if (item['month'] == monthMap[month.month]) {
+                    if (filters.missingData.indexOf('GPS Coordinates') != -1) {
+                        if (item['decimalLatitude'] != 999 || item['decimalLongitude'] != 999) {
+                            month.count -= 1;
+                            flag = true;
+                        }
+                    }
+                    if (filters.missingData.indexOf('Date') != -1 && !flag) {
+                        if (item['eventDate'] != 'null') {
+                            month.count -= 1;
+                        }
+                    }
+                }
+            });
+        });
+    }
+
     return monthlyData;
 }
 
@@ -301,6 +353,27 @@ function preparePhylumData(data, filters) {
         phylumData.forEach((phyla) => {
             data.forEach((item) => {
                 if (item['phylum'] == phyla.phylum && filters.collectors.indexOf(item['recordedBy']) == -1) phyla.count -= 1;
+            });
+        });
+    }
+
+    if (filters.missingData.length > 0) {
+        phylumData.forEach((phyla) => {
+            data.forEach((item) => {
+                if (item['phylum'] == phyla.phylum) {
+                    let flag = false;
+                    if (filters.missingData.indexOf('GPS Coordinates') != -1) {
+                        if (item['decimalLatitude'] != 999 || item['decimalLongitude'] != 999) {
+                            phyla.count -= 1;
+                            flag = true;
+                        }
+                    }
+                    if (filters.missingData.indexOf('Date') != -1 && !flag) {
+                        if (item['eventDate'] != 'null') {
+                            phyla.count -= 1;
+                        }
+                    }
+                }
             });
         });
     }
@@ -345,6 +418,27 @@ function prepareRecorderData(data, filters) {
         collectorData.forEach((collector) => {
             data.forEach((item) => {
                 if (item['recordedBy'] == collector.collector && filters.phyla.indexOf(item['phylum']) == -1) collector.count -= 1;
+            });
+        });
+    }
+
+    if (filters.missingData.length > 0) {
+        collectorData.forEach((collector) => {
+            data.forEach((item) => {
+                if (item['recordedBy'] == collector.collector) {
+                    let flag = false
+                    if (filters.missingData.indexOf('GPS Coordinates') != -1) {
+                        if (item['decimalLatitude'] != 999 || item['decimalLongitude'] != 999) {
+                            collector.count -= 1;
+                            flag = true;
+                        }
+                    }
+                    if (filters.missingData.indexOf('Date') != -1 && !flag) {
+                        if (item['eventDate'] != 'null') {
+                            collector.count -= 1;
+                        }
+                    }
+                }
             });
         });
     }

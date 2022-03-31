@@ -69,6 +69,7 @@ class missingDataChart {
             .attr('pointer-events', 'all')
             .attr('transform', `translate(${vis.config.margin.left}, ${vis.config.margin.top})`)
             .attr('fill', 'green')
+            .attr('class', 'off')
             .on('mouseover', function (event, d) {
                 d3.select(this)
                     .transition()
@@ -98,6 +99,23 @@ class missingDataChart {
                     .style('left', 0)
                     .style('top', 0)
                     .style('opacity', 0);
+            })
+            .on('click', function() {
+                const bar = d3.select(this);
+                if (bar.attr('class') == 'off') {
+                    bar.attr('class', 'on');
+                } else {
+                    bar.attr('class', 'off');
+                }
+
+                let selectedMissingValues = [];
+
+                d3.selectAll('.on')._groups[0].forEach((item) => {
+                    selectedMissingValues.push(item.__data__.field);
+                });
+
+                const event = new CustomEvent('missingFilter', {detail: selectedMissingValues});
+                document.dispatchEvent(event);
             });
 
 
