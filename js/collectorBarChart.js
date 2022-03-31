@@ -69,6 +69,7 @@ class collectorBarChart {
             .attr('transform', `translate(${vis.config.margin.left}, ${vis.config.margin.top})`)
             .attr('fill', 'purple')
             .attr('height', d => vis.height - vis.yScale(d.count))
+            .attr('class', 'off')
             .on('mouseover', function (event, d) {
                 d3.select(this)
                     .transition()
@@ -98,6 +99,23 @@ class collectorBarChart {
                     .style('left', 0)
                     .style('top', 0)
                     .style('opacity', 0);
+            })
+            .on('click', function () {
+                const bar = d3.select(this);
+                if (bar.attr('class') == 'off') {
+                    bar.attr('class', 'on');
+                } else {
+                    bar.attr('class', 'off');
+                }
+
+                let selectedCollectors = [];
+
+                d3.selectAll('.on')._groups[0].forEach((item) => {
+                    selectedCollectors.push(item.__data__.collector);
+                });
+
+                const event = new CustomEvent('collectorFilter', {detail: selectedCollectors});
+                document.dispatchEvent(event);
             });
 
 

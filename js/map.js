@@ -82,8 +82,7 @@ class SpecimenMap {
             })
             .on('mouseleave', function (event) {
                 d3.select('#tooltip')
-                    .style('left', 0)
-                    .style('top', 0)
+                    .style('z-index', -1)
                     .style('opacity', 0);
 
                 d3.select(this)
@@ -319,8 +318,7 @@ class SpecimenMap {
             })
             .on('mouseleave', function (event) {
                 d3.select('#tooltip')
-                    .style('left', 0)
-                    .style('top', 0)
+                    .style('z-index', -1)
                     .style('opacity', 0);
 
                 d3.select(this)

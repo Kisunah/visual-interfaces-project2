@@ -5,7 +5,7 @@ d3.csv('data/formatted.csv')
         let filters = {
             months: [],
             phyla: [],
-            recorders: [],
+            collectors: [],
             missingData: []
         };
 
@@ -173,7 +173,21 @@ d3.csv('data/formatted.csv')
             monthChart.updateChart(monthData);
             collectorChart.updateChart(collectorData);
             missingChart.updateChart(missingData);
-        })
+        });
+
+        document.addEventListener('collectorFilter', (event) => {
+            filters.collectors = event.detail;
+
+            let mapData = prepareMapData(data, filters);
+            let monthData = prepareMonthData(data, filters);
+            let phylumData = preparePhylumData(data, filters);
+            let missingData = prepareMissingData(data, filters);
+
+            map.updateChart(mapData);
+            monthChart.updateChart(monthData);
+            phylumChart.updateChart(phylumData);
+            missingChart.updateChart(missingData);
+        });
     })
     .catch(err => console.error(err));
 
@@ -192,10 +206,18 @@ function prepareMapData(data, filters) {
         return false;
     }
 
+    function filterByCollector(item) {
+        if (filters.collectors.indexOf(item['recordedBy']) != -1) {
+            return true;
+        }
+        return false;
+    }
+
     let mapData = data;
 
     if (filters.months.length > 0) mapData = mapData.filter(filterByMonth);
     if (filters.phyla.length > 0) mapData = mapData.filter(filterByPhylum);
+    if (filters.collectors.length > 0) mapData = mapData.filter(filterByCollector);
 
     return mapData;
 }
@@ -207,7 +229,7 @@ function prepareMonthData(data, filters) {
         'January': '1',
         'February': '2',
         'March': '3',
-        'April': '4', 
+        'April': '4',
         'May': '5',
         'June': '6',
         'July': '7',
@@ -229,13 +251,25 @@ function prepareMonthData(data, filters) {
         monthlyData.push(obj);
     });
 
-    monthlyData.forEach((month) => {
-        data.forEach((item) => {
-            if (item['month'] == monthMap[month.month] && filters.phyla.length > 0 && filters.phyla.indexOf(item['phylum']) == -1) {
-                month.count -= 1;
-            }
+    if (filters.phyla.length > 0) {
+        monthlyData.forEach((month) => {
+            data.forEach((item) => {
+                if (item['month'] == monthMap[month.month] && filters.phyla.indexOf(item['phylum']) == -1) {
+                    month.count -= 1;
+                }
+            });
         });
-    });
+    }
+
+    if (filters.collectors.length > 0) {
+        monthlyData.forEach((month) => {
+            data.forEach((item) => {
+                if (item['month'] == monthMap[month.month] && filters.collectors.indexOf(item['recordedBy']) == -1) {
+                    month.count -= 1;
+                }
+            });
+        });
+    }
 
     return monthlyData;
 }
@@ -259,6 +293,14 @@ function preparePhylumData(data, filters) {
         phylumData.forEach((phyla) => {
             data.forEach((item) => {
                 if (item['phylum'] == phyla.phylum && filters.months.indexOf(item['month']) == -1) phyla.count -= 1;
+            });
+        });
+    }
+
+    if (filters.collectors.length > 0) {
+        phylumData.forEach((phyla) => {
+            data.forEach((item) => {
+                if (item['phylum'] == phyla.phylum && filters.collectors.indexOf(item['recordedBy']) == -1) phyla.count -= 1;
             });
         });
     }
@@ -355,7 +397,7 @@ function prepareMissingData(data, filters) {
                         }
                     }
                 }
-    
+
                 if (missing.field == 'Date') {
                     if (item['eventDate'] == 'null') {
                         if (filters.months.indexOf(item['month']) == -1) {
@@ -372,7 +414,7 @@ function prepareMissingData(data, filters) {
         });
     }
 
-    if(filters.phyla.length > 0) {
+    if (filters.phyla.length > 0) {
         missingData.forEach((missing) => {
             data.forEach((item) => {
                 if (missing.field == 'GPS Coordinates') {
@@ -386,7 +428,7 @@ function prepareMissingData(data, filters) {
                         }
                     }
                 }
-    
+
                 if (missing.field == 'Date') {
                     if (item['eventDate'] == 'null') {
                         if (filters.phyla.indexOf(item['phylum']) == -1) {
@@ -403,5 +445,36 @@ function prepareMissingData(data, filters) {
         });
     }
 
-    return missingData;
+    if (filters.collectors.length > 0) {
+        missingData.forEach((missing) => {
+            data.forEach((item) => {
+                if (missing.field == 'GPS Coordinates') {
+                    if (item['decimalLatitude'] == 999 || item['decimalLongitude'] == 999) {
+                        if (filters.collectors.indexOf(item['recordedBy']) == -1) {
+                            missing.missing -= 1;
+                        }
+                    } else {
+                        if (filters.collectors.indexOf(item['recordedBy']) == -1) {
+                            missing.existing -= 1;
+                        }
+                    }
+                }
+
+                if (missing.field == 'Date') {
+                    if (item['eventDate'] == 'null') {
+                        if (filters.collectors.indexOf(item['recordedBy']) == -1) {
+                            missing.missing -= 1;
+                        }
+                    } else {
+                        if (filters.collectors.indexOf(item['recordedBy']) == -1) {
+                            missing.existing -= 1;
+                        }
+                    }
+                }
+            });
+            missing.totalSpecimens = missing.missing + missing.existing;
+        });
+    }
+
+        return missingData;
 }
