@@ -273,14 +273,11 @@ class SpecimenMap {
     updateChart(newData) {
         let vis = this;
 
+        vis.Dots.remove().exit();
+
         vis.Dots = vis.svg.selectAll('circle')
             .data(newData)
             .join('circle')
-            .attr('fill', (d) => {
-                if (d['year'] == 'null') return 'black';
-                vis.colorBy = 'year';
-                return vis.yearColorScale(parseInt(d['year']));
-            })
             .attr('stroke', 'black')
             .attr('cx', d => vis.theMap.latLngToLayerPoint([d['decimalLatitude'], d['decimalLongitude']]).x)
             .attr('cy', d => vis.theMap.latLngToLayerPoint([d['decimalLatitude'], d['decimalLongitude']]).y)
