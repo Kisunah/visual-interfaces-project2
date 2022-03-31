@@ -143,6 +143,9 @@ class monthBarChart {
     updateChart(newData) {
         let vis = this;
 
+        vis.yScale.domain([0, d3.max(newData, d => d.count)]);
+        vis.yAxisG.call(vis.yAxis);
+
         vis.svg.selectAll('rect')
             .data(newData)
             .transition().duration(1000)

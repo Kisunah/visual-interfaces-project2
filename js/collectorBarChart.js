@@ -114,7 +114,7 @@ class collectorBarChart {
                     selectedCollectors.push(item.__data__.collector);
                 });
 
-                const event = new CustomEvent('collectorFilter', {detail: selectedCollectors});
+                const event = new CustomEvent('collectorFilter', { detail: selectedCollectors });
                 document.dispatchEvent(event);
             });
 
@@ -129,6 +129,9 @@ class collectorBarChart {
 
     updateChart(newData) {
         let vis = this;
+
+        vis.yScale.domain([0, d3.max(newData, d => d.count)]);
+        vis.yAxisG.call(vis.yAxis);
 
         vis.svg.selectAll('rect')
             .data(newData)

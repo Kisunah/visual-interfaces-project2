@@ -128,10 +128,15 @@ class missingDataChart {
     updateChart(newData) {
         let vis = this;
 
+        vis.yScale.domain([0, d3.max(newData, d => d.missing)]);
+        vis.yAxisG.call(vis.yAxis);
+
         vis.svg.selectAll('rect')
             .data(newData)
             .transition().duration(1000)
             .attr('y', d => vis.yScale(d.missing))
             .attr('height', d => vis.height - vis.yScale(d.missing));
+
+        vis.yAxisG.call(vis.yAxis);
     }
 }
