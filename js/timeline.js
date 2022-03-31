@@ -84,8 +84,8 @@ class Timeline {
             .on('brush', function ({ selection }) {
                 if (selection) vis.brushed(selection);
             })
-            .on('end', function ({ selection }) {
-                if (!selection) vis.brushed(null);
+            .on('end', function ({ sourceEvent, selection }) {
+                vis.brushEnd(selection, sourceEvent);
             });
 
         vis.updateVis();
@@ -165,5 +165,47 @@ class Timeline {
         vis.xAxisFocusG.call(vis.xAxisFocus);
 
         vis.focusBar.attr('x', d => vis.xScaleFocus(d.year));
+
+        vis.focusBar
+            .attr('width', vis.xScaleFocus.bandwidth())
+            .attr('height', d => vis.height - vis.config.margin.top - vis.config.margin.bottom - vis.yScaleFocus(d.specimenCount))
+            .attr('x', d => vis.xScaleFocus(d.year))
+            .attr('y', d => vis.yScaleFocus(d.specimenCount))
+            .attr('fill', d => {
+                if (vis.xScaleFocus(d.year)) return 'black';
+                return 'none';
+            });
+    }
+
+    brushEnd(selection, sourceEvent) {
+        let vis = this;
+        if (!sourceEvent) return;
+        if (!selection) {
+            vis.xScaleFocus.domain(vis.xScaleContext.domain());
+            vis.xAxisFocusG.call(vis.xAxisFocus);
+            vis.focusBar.attr('x', d => vis.xScaleFocus(d.year));
+            return;
+        }
+
+        let eachBand = vis.xScaleContext.step();
+        let index1 = Math.round(selection[0] / eachBand);
+        let year1 = vis.xScaleContext.domain()[index1];
+        let index2 = Math.round(selection[1] / eachBand) - 1;
+        let year2 = vis.xScaleContext.domain()[index2];
+
+        let begin = vis.xScaleContext(year1)
+        let end = vis.xScaleContext(year2);
+
+        vis.brushG.transition().call(vis.brush.move, [begin, end + eachBand]);
+
+        vis.focusBar
+            .attr('width', vis.xScaleFocus.bandwidth())
+            .attr('height', d => vis.height - vis.config.margin.top - vis.config.margin.bottom - vis.yScaleFocus(d.specimenCount))
+            .attr('x', d => vis.xScaleFocus(d.year))
+            .attr('y', d => vis.yScaleFocus(d.specimenCount))
+            .attr('fill', d => {
+                if (vis.xScaleFocus(d.year)) return 'black';
+                return 'none';
+            });
     }
 }
