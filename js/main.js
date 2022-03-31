@@ -2,6 +2,13 @@ d3.csv('data/formatted.csv')
     .then(_data => {
         console.log('Data loading complete');
 
+        let filters = {
+            months: [],
+            phyla: [],
+            recorders: [],
+            missingData: []
+        };
+
         let data = _data;
 
         // Find all data items that don't have lat/long values and replace them with 999
@@ -44,7 +51,7 @@ d3.csv('data/formatted.csv')
             timelineData.push(obj);
         });
 
-        let timeline = new Timeline({ parentElement: "#timeline" }, timelineData);        
+        let timeline = new Timeline({ parentElement: "#timeline" }, timelineData);
 
         // Logic for creating the specimens collected by month bar chart
         let monthlyData = [];
@@ -100,7 +107,7 @@ d3.csv('data/formatted.csv')
             collectorData.push(obj);
         });
 
-        collectorData.sort(function(a, b) {
+        collectorData.sort(function (a, b) {
             return b.count - a.count
         });
         collectorData = collectorData.slice(0, 10);
@@ -139,5 +146,162 @@ d3.csv('data/formatted.csv')
         let missingData = [gpsObject, dateObject];
 
         let missingChart = new missingDataChart({ parentElement: '#missingDataChart' }, missingData);
+
+        document.addEventListener('monthFilter', (event) => {
+            filters.months = event.detail;
+
+            let mapData = prepareMapData(data, filters);
+            let phylumData = preparePhylumData(data, filters);
+            let collectorData = prepareRecorderData(data, filters);
+            let missingData = prepareMissingData(data, filters);
+
+            map.updateChart(mapData);
+            phylumChart.updateChart(phylumData);
+            collectorChart.updateChart(collectorData);
+            missingChart.updateChart(missingData);
+        });
     })
     .catch(err => console.error(err));
+
+function prepareMapData(data, filters) {
+    function filterByMonth(item) {
+        if (filters.months.indexOf(item['month']) != -1) {
+            return true;
+        }
+        return false;
+    }
+
+    let mapData = data;
+
+    if (filters.months.length > 0) mapData = mapData.filter(filterByMonth);
+    // mapData.forEach((item, idx) => {
+    //     if (filters.months.length > 0 && filters.months.indexOf(item['month']) == -1) {
+    //         mapData.splice(idx, 1);
+    //     } else {
+    //         console.log(item['month']);
+    //     }
+    // });
+
+    return mapData;
+}
+
+function preparePhylumData(data, filters) {
+    let phylumData = [];
+    let phyla = ['Myxomycota', 'Ascomycota', 'Amoebozoa', 'Basidiomycota', 'Chytridiomycota', 'Zygomycota', 'Oomycota', 'Blastocladiomycota'];
+
+    phyla.forEach((phylum) => {
+        let obj = {
+            phylum: phylum,
+            count: 0
+        }
+        data.forEach((item) => {
+            if (item['phylum'] == phylum) obj.count += 1;
+        });
+        phylumData.push(obj);
+    });
+
+    phylumData.forEach((phyla) => {
+        data.forEach((item) => {
+            if (item['phylum'] == phyla.phylum && filters.months.length > 0 && filters.months.indexOf(item['month']) == -1) phyla.count -= 1;
+        });
+    });
+
+    return phylumData;
+}
+
+function prepareRecorderData(data, filters) {
+    let collectorData = [];
+    let collectors = [];
+    data.forEach((item) => {
+        if (collectors.indexOf(item['recordedBy']) == -1) {
+            collectors.push(item['recordedBy'])
+        }
+    });
+
+    collectors.forEach((collector) => {
+        let obj = {
+            collector: collector,
+            count: 0
+        };
+        data.forEach((item) => {
+            if (item['recordedBy'] == collector && item['recordedBy'] != 's.n.') obj.count += 1;
+        });
+        collectorData.push(obj);
+    });
+
+    collectorData.sort(function (a, b) {
+        return b.count - a.count
+    });
+    collectorData = collectorData.slice(0, 10);
+
+    collectorData.forEach((collector) => {
+        data.forEach((item) => {
+            if (item['recordedBy'] == collector.collector && filters.months.length > 0 && filters.months.indexOf(item['month']) == -1) collector.count -= 1;
+        });
+    });
+
+    return collectorData;
+}
+
+function prepareMissingData(data, filters) {
+    let gpsObject = {
+        field: 'GPS Coordinates',
+        totalSpecimens: 0,
+        missing: 0,
+        existing: 0
+    };
+
+    let dateObject = {
+        field: 'Date',
+        totalSpecimens: 0,
+        missing: 0,
+        existing: 0
+    };
+    data.forEach((item) => {
+        if (item['decimalLatitude'] == 999 || item['decimalLongitude'] == 999) {
+            gpsObject.missing += 1;
+        } else {
+            gpsObject.existing += 1;
+        }
+
+        if (item['eventDate'] == 'null') {
+            dateObject.missing += 1;
+        } else {
+            dateObject.existing += 1;
+        }
+    });
+    gpsObject.totalSpecimens = gpsObject.existing + gpsObject.missing;
+    dateObject.totalSpecimens = dateObject.existing + dateObject.missing;
+    let missingData = [gpsObject, dateObject];
+
+    missingData.forEach((missing) => {
+        data.forEach((item) => {
+            if (missing.field == 'GPS Coordinates') {
+                if (item['decimalLatitude'] == 999 || item['decimalLongitude'] == 999) {
+                    if (filters.months.length > 0 && filters.months.indexOf(item['month']) == -1) {
+                        missing.missing -= 1;
+                    }
+                } else {
+                    if (filters.months.length > 0 && filters.months.indexOf(item['month']) == -1) {
+                        missing.existing -= 1;
+                    }
+                }
+            }
+
+            if (missing.field == 'Date') {
+                if (item['eventDate'] == 'null') {
+                    if (filters.months.length > 0 && filters.months.indexOf(item['month']) == -1) {
+                        missing.missing -= 1;
+                    }
+                } else {
+                    if (filters.months.length > 0 && filters.months.indexOf(item['month']) == -1) {
+                        missing.existing -= 1;
+                    }
+                }
+            }
+        });
+        missing.totalSpecimens = missing.missing + missing.existing;
+    });
+
+    return missingData;
+}

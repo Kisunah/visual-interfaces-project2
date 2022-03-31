@@ -69,7 +69,7 @@ class missingDataChart {
             .attr('pointer-events', 'all')
             .attr('transform', `translate(${vis.config.margin.left}, ${vis.config.margin.top})`)
             .attr('fill', 'green')
-            .on('mouseover', function(event, d) {
+            .on('mouseover', function (event, d) {
                 d3.select(this)
                     .transition()
                     .duration(150)
@@ -87,7 +87,7 @@ class missingDataChart {
                     .style('left', (event.pageX + 10) + 'px')
                     .style('top', (event.pageY + 10) + 'px');
             })
-            .on('mouseleave', function(event, d) {
+            .on('mouseleave', function (event, d) {
                 d3.select(this)
                     .transition()
                     .duration(150)
@@ -103,7 +103,17 @@ class missingDataChart {
 
         vis.xAxisG.call(vis.xAxis)
             .selectAll('text')
-                .style('font-weight', 'bold')
+            .style('font-weight', 'bold')
         vis.yAxisG.call(vis.yAxis);
+    }
+
+    updateChart(newData) {
+        let vis = this;
+
+        vis.svg.selectAll('rect')
+            .data(newData)
+            .transition().duration(1000)
+            .attr('y', d => vis.yScale(d.missing))
+            .attr('height', d => vis.height - vis.yScale(d.missing));
     }
 }

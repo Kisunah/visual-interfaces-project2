@@ -71,3 +71,13 @@
 #timeline {
     width: 100%;
 }
+
+.on {
+    stroke: black;
+    stroke-width: 2;
+}
+
+.off {
+    stroke: none;
+    stroke-width: 0;
+}

@@ -67,7 +67,7 @@ class SpecimenMap {
                     .duration(150)
                     .attr('stroke-width', 2)
                     .attr('r', vis.radiusSize + 1)
-                    .style('cursor', 'default')
+                    .style('cursor', 'pointer')
 
                 d3.select('#tooltip')
                     .style('opacity', 1)
@@ -92,7 +92,7 @@ class SpecimenMap {
                     .attr('stroke-width', 1)
                     .attr('r', vis.radiusSize)
             })
-            .on('click', function(event, d) {
+            .on('click', function (event, d) {
                 window.open(d['references']);
             });
 
@@ -269,5 +269,68 @@ class SpecimenMap {
             d3.select('#phylumLegend')
                 .style('visibility', 'visible');
         }
+    }
+
+    updateChart(newData) {
+        let vis = this;
+
+        vis.Dots = vis.svg.selectAll('circle')
+            .data(newData)
+            .join('circle')
+            .attr('fill', (d) => {
+                if (d['year'] == 'null') return 'black';
+                vis.colorBy = 'year';
+                return vis.yearColorScale(parseInt(d['year']));
+            })
+            .attr('stroke', 'black')
+            .attr('cx', d => vis.theMap.latLngToLayerPoint([d['decimalLatitude'], d['decimalLongitude']]).x)
+            .attr('cy', d => vis.theMap.latLngToLayerPoint([d['decimalLatitude'], d['decimalLongitude']]).y)
+            .attr('r', vis.radiusSize)
+            .attr('fill', (d) => {
+                if (vis.colorBy == 'year') {
+                    if (d['year'] == 'null') return 'black';
+                    return vis.yearColorScale(parseInt(d['year']));
+                }
+                else if (vis.colorBy == 'startDay') {
+                    return vis.dayColorScale(parseInt(d['startDayOfYear']));
+                }
+                else if (vis.colorBy == 'phylum') {
+                    return vis.phylumColorScale(d['phylum']);
+                }
+            })
+            .on('mouseover', function (event, d) {
+                d3.select(this)
+                    .transition()
+                    .duration(150)
+                    .attr('stroke-width', 2)
+                    .attr('r', vis.radiusSize + 1)
+                    .style('cursor', 'pointer')
+
+                d3.select('#tooltip')
+                    .style('opacity', 1)
+                    .style('z-index', 100000)
+                    .html(`<div class="tooltip-label">Name: ${d['genus']} ${d['specificEpithet']}<br>Year: ${d['year']}<br>Recorded By: ${d['recordedBy']}<br>Classification: ${d['higherClassification']}<br>Habitat Notes: ${d['habitat']}<br>Substrate Notes: ${d['substrate']}</div>`);
+
+            })
+            .on('mousemove', function (event) {
+                d3.select('#tooltip')
+                    .style('left', (event.pageX + 10) + 'px')
+                    .style('top', (event.pageY + 10) + 'px');
+            })
+            .on('mouseleave', function (event) {
+                d3.select('#tooltip')
+                    .style('left', 0)
+                    .style('top', 0)
+                    .style('opacity', 0);
+
+                d3.select(this)
+                    .transition()
+                    .duration(150)
+                    .attr('stroke-width', 1)
+                    .attr('r', vis.radiusSize)
+            })
+            .on('click', function (event, d) {
+                window.open(d['references']);
+            });
     }
 }
