@@ -114,7 +114,7 @@ class phylumBarChart {
                     selectedPhyla.push(item.__data__.phylum);
                 });
 
-                const event = new CustomEvent('phylumFilter', {detail: selectedPhyla});
+                const event = new CustomEvent('phylumFilter', { detail: selectedPhyla });
                 document.dispatchEvent(event);
             });
 
@@ -127,7 +127,7 @@ class phylumBarChart {
         vis.yAxisG.call(vis.yAxis);
     }
 
-    updateChart(newData) {
+    updateChart(newData, enabled) {
         let vis = this;
 
         vis.yScale.domain([0, d3.max(newData, d => d.count)]);
@@ -138,5 +138,30 @@ class phylumBarChart {
             .transition().duration(1000)
             .attr('y', d => vis.yScale(d.count))
             .attr('height', d => vis.height - vis.yScale(d.count));
+
+        if (enabled) {
+            vis.svg.selectAll('rect')
+                .on('click', function () {
+                    const bar = d3.select(this);
+                    if (bar.attr('class') == 'off') {
+                        bar.attr('class', 'on');
+                    } else {
+                        bar.attr('class', 'off');
+                    }
+
+                    let selectedPhyla = [];
+
+                    d3.selectAll('.on')._groups[0].forEach((item) => {
+                        selectedPhyla.push(item.__data__.phylum);
+                    });
+
+                    const event = new CustomEvent('phylumFilter', { detail: selectedPhyla });
+                    document.dispatchEvent(event);
+                });
+        } else {
+            // Disables the ability to click on these bars to prevent multiple filters from being selected
+            vis.svg.selectAll('rect')
+                .on('click', () => {});
+        }
     }
 }

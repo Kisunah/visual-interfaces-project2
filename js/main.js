@@ -150,10 +150,13 @@ d3.csv('data/formatted.csv')
             let collectorData = prepareRecorderData(data, filters);
             let missingData = prepareMissingData(data, filters);
 
+            let enabled = false;
+            if (filters.months.length == 0) enabled = true; 
+
             map.updateChart(mapData);
-            phylumChart.updateChart(phylumData);
-            collectorChart.updateChart(collectorData);
-            missingChart.updateChart(missingData);
+            phylumChart.updateChart(phylumData, enabled);
+            collectorChart.updateChart(collectorData, enabled);
+            missingChart.updateChart(missingData, enabled);
         });
 
         document.addEventListener('phylumFilter', (event) => {
@@ -164,10 +167,13 @@ d3.csv('data/formatted.csv')
             let collectorData = prepareRecorderData(data, filters);
             let missingData = prepareMissingData(data, filters);
 
+            let enabled = false;
+            if (filters.phyla.length == 0) enabled = true;
+
             map.updateChart(mapData);
-            monthChart.updateChart(monthData);
-            collectorChart.updateChart(collectorData);
-            missingChart.updateChart(missingData);
+            monthChart.updateChart(monthData, enabled);
+            collectorChart.updateChart(collectorData, enabled);
+            missingChart.updateChart(missingData, enabled);
         });
 
         document.addEventListener('collectorFilter', (event) => {
@@ -178,10 +184,13 @@ d3.csv('data/formatted.csv')
             let phylumData = preparePhylumData(data, filters);
             let missingData = prepareMissingData(data, filters);
 
+            let enabled = false;
+            if (filters.collectors.length == 0) enabled = true;
+
             map.updateChart(mapData);
-            monthChart.updateChart(monthData);
-            phylumChart.updateChart(phylumData);
-            missingChart.updateChart(missingData);
+            monthChart.updateChart(monthData, enabled);
+            phylumChart.updateChart(phylumData, enabled);
+            missingChart.updateChart(missingData, enabled);
         });
 
         document.addEventListener('missingFilter', (event) => {
@@ -191,11 +200,14 @@ d3.csv('data/formatted.csv')
             let monthData = prepareMonthData(data, filters);
             let phylumData = preparePhylumData(data, filters);
             let collectorData = prepareRecorderData(data, filters);
+
+            let enabled = false;
+            if (filters.missingData.length == 0) enabled = true;
             
             map.updateChart(mapData);
-            monthChart.updateChart(monthData);
-            phylumChart.updateChart(phylumData);
-            collectorChart.updateChart(collectorData);
+            monthChart.updateChart(monthData, enabled);
+            phylumChart.updateChart(phylumData, enabled);
+            collectorChart.updateChart(collectorData, enabled);
         });
     })
     .catch(err => console.error(err));

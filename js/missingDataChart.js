@@ -100,7 +100,7 @@ class missingDataChart {
                     .style('top', 0)
                     .style('opacity', 0);
             })
-            .on('click', function() {
+            .on('click', function () {
                 const bar = d3.select(this);
                 if (bar.attr('class') == 'off') {
                     bar.attr('class', 'on');
@@ -114,7 +114,7 @@ class missingDataChart {
                     selectedMissingValues.push(item.__data__.field);
                 });
 
-                const event = new CustomEvent('missingFilter', {detail: selectedMissingValues});
+                const event = new CustomEvent('missingFilter', { detail: selectedMissingValues });
                 document.dispatchEvent(event);
             });
 
@@ -125,7 +125,7 @@ class missingDataChart {
         vis.yAxisG.call(vis.yAxis);
     }
 
-    updateChart(newData) {
+    updateChart(newData, enabled) {
         let vis = this;
 
         vis.yScale.domain([0, d3.max(newData, d => d.missing)]);
@@ -137,6 +137,28 @@ class missingDataChart {
             .attr('y', d => vis.yScale(d.missing))
             .attr('height', d => vis.height - vis.yScale(d.missing));
 
-        vis.yAxisG.call(vis.yAxis);
+        if (enabled) {
+            vis.svg.selectAll('rect')
+                .on('click', function () {
+                    const bar = d3.select(this);
+                    if (bar.attr('class') == 'off') {
+                        bar.attr('class', 'on');
+                    } else {
+                        bar.attr('class', 'off');
+                    }
+
+                    let selectedMissingValues = [];
+
+                    d3.selectAll('.on')._groups[0].forEach((item) => {
+                        selectedMissingValues.push(item.__data__.field);
+                    });
+
+                    const event = new CustomEvent('missingFilter', { detail: selectedMissingValues });
+                    document.dispatchEvent(event);
+                });
+        } else {
+            vis.svg.selectAll('rect')
+                .on('click', () => { });
+        }
     }
 }
