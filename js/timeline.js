@@ -138,7 +138,37 @@ class Timeline {
             .attr('height', d => vis.height - vis.config.margin.top - vis.config.margin.bottom - vis.yScaleFocus(d.specimenCount))
             .attr('x', d => vis.xScaleFocus(d.year))
             .attr('y', d => vis.yScaleFocus(d.specimenCount))
-            .attr('fill', d => vis.yearColorScale(d.year));
+            .attr('fill', d => vis.yearColorScale(d.year))
+            .on('mouseover', function(event, d) {
+                d3.select(this)
+                    .transition()
+                    .duration(150)
+                    .attr('stroke', 'black')
+                    .attr('stroke-width', 2)
+                    .style('cursor', 'pointer');
+
+                d3.select('#timelineTooltip')
+                    .style('opacity', 1)
+                    .style('z-index', 100000)
+                    .html(`<div class="tooltip-label">Year: ${d.year}<br>Count: ${d.specimenCount}</div>`)
+            })
+            .on('mousemove', function (event) {
+                d3.select('#timelineTooltip')
+                    .style('left', (event.pageX + 10) + 'px')
+                    .style('top', (event.pageY + 10) + 'px');
+            })
+            .on('mouseleave', function (event, d) {
+                d3.select(this)
+                    .transition()
+                    .duration(150)
+                    .attr('stroke-width', 0)
+                    .style('cursor', 'default');
+
+                d3.select('#timelineTooltip')
+                    .style('left', 0)
+                    .style('top', 0)
+                    .style('opacity', 0);
+            });
 
         vis.xAxisFocusG.call(vis.xAxisFocus);
 
@@ -200,6 +230,9 @@ class Timeline {
                     if (vis.xScaleFocus(d.year)) return vis.yearColorScale(d.year);
                     return 'none';
                 });
+
+            const event = new CustomEvent('timelineFilter', { detail: { begin: 1859, end: 2017 } });
+            document.dispatchEvent(event);
             return;
         }
 
