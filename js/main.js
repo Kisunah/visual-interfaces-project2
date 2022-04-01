@@ -260,7 +260,7 @@ function prepareMapData(data, filters) {
     }
 
     function filterByYear(item) {
-        if (parseInt(item['year']) > filters.years[0] && parseInt(item['year']) < filters.years[1])  {
+        if (parseInt(item['year']) >= filters.years[0] && parseInt(item['year']) <= filters.years[1])  {
             return true;
         }
         return false;
