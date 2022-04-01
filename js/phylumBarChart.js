@@ -44,6 +44,14 @@ class phylumBarChart {
         vis.yAxisG = vis.chart.append('g')
             .attr('class', 'axis y-axis');
 
+        vis.svg.append('text')
+            .attr('x', (vis.width / 2) + vis.config.margin.left)
+            .attr('y', vis.config.margin.top - 10)
+            .attr('text-anchor', 'middle')
+            .text('Count By Phylum')
+            .style('font-size', '20px')
+            .style('font-weight', 'bold')
+
         vis.updateVis();
     }
 
@@ -161,7 +169,7 @@ class phylumBarChart {
         } else {
             // Disables the ability to click on these bars to prevent multiple filters from being selected
             vis.svg.selectAll('rect')
-                .on('click', () => {});
+                .on('click', () => { });
         }
     }
 }
