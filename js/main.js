@@ -142,6 +142,15 @@ d3.csv('data/formatted.csv')
 
         let missingChart = new missingDataChart({ parentElement: '#missingDataChart' }, missingData);
 
+        document.addEventListener('timelineFilter', (event) => {
+            let startYear = event.detail.begin;
+            let endYear = event.detail.end;
+
+            filters.years = [startYear, endYear];
+            let mapData = prepareMapData(data, filters);
+            map.updateChart(mapData);
+        });
+
         document.addEventListener('monthFilter', (event) => {
             filters.months = event.detail;
 
@@ -250,12 +259,20 @@ function prepareMapData(data, filters) {
         return false;
     }
 
+    function filterByYear(item) {
+        if (parseInt(item['year']) > filters.years[0] && parseInt(item['year']) < filters.years[1])  {
+            return true;
+        }
+        return false;
+    }
+
     let mapData = data;
 
     if (filters.months.length > 0) mapData = mapData.filter(filterByMonth);
     if (filters.phyla.length > 0) mapData = mapData.filter(filterByPhylum);
     if (filters.collectors.length > 0) mapData = mapData.filter(filterByCollector);
     if (filters.missingData.length > 0) mapData = mapData.filter(filterByMissing);
+    if (filters.years.length > 0) mapData = mapData.filter(filterByYear);
 
     return mapData;
 }
