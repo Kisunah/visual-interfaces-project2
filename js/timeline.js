@@ -22,6 +22,9 @@ class Timeline {
 
         vis.height = containerHeight;
 
+        vis.yearColorScale = d3.scaleSequential(d3.interpolateOrRd)
+            .domain([1859, 2017]);
+
         vis.xScaleFocus = d3.scaleBand()
             .padding(0.1)
             .range([0, vis.config.width]);
@@ -135,7 +138,7 @@ class Timeline {
             .attr('height', d => vis.height - vis.config.margin.top - vis.config.margin.bottom - vis.yScaleFocus(d.specimenCount))
             .attr('x', d => vis.xScaleFocus(d.year))
             .attr('y', d => vis.yScaleFocus(d.specimenCount))
-            .attr('fill', 'black');
+            .attr('fill', d => vis.yearColorScale(d.year));
 
         vis.xAxisFocusG.call(vis.xAxisFocus);
 
@@ -173,7 +176,7 @@ class Timeline {
             .attr('x', d => vis.xScaleFocus(d.year))
             .attr('y', d => vis.yScaleFocus(d.specimenCount))
             .attr('fill', d => {
-                if (vis.xScaleFocus(d.year)) return 'black';
+                if (vis.xScaleFocus(d.year)) return vis.yearColorScale(d.year);
                 return 'none';
             });
 
@@ -194,7 +197,7 @@ class Timeline {
                 .attr('x', d => vis.xScaleFocus(d.year))
                 .attr('y', d => vis.yScaleFocus(d.specimenCount))
                 .attr('fill', d => {
-                    if (vis.xScaleFocus(d.year)) return 'black';
+                    if (vis.xScaleFocus(d.year)) return vis.yearColorScale(d.year);
                     return 'none';
                 });
             return;
@@ -217,7 +220,7 @@ class Timeline {
             .attr('x', d => vis.xScaleFocus(d.year))
             .attr('y', d => vis.yScaleFocus(d.specimenCount))
             .attr('fill', d => {
-                if (vis.xScaleFocus(d.year)) return 'black';
+                if (vis.xScaleFocus(d.year)) return vis.yearColorScale(d.year);
                 return 'none';
             });
 
