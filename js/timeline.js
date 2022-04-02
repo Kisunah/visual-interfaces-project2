@@ -83,11 +83,14 @@ class Timeline {
 
         // Initialize brush component
         vis.brush = d3.brushX()
-            .extent([[0, 0], [vis.config.width, vis.config.contextHeight]])
-            .on('brush', function ({ selection }) {
+            .extent([
+                [0, 0],
+                [vis.config.width, vis.config.contextHeight]
+            ])
+            .on('brush', function({ selection }) {
                 if (selection) vis.brushed(selection);
             })
-            .on('end', function ({ sourceEvent, selection }) {
+            .on('end', function({ sourceEvent, selection }) {
                 vis.brushEnd(selection, sourceEvent);
             });
 
@@ -152,12 +155,12 @@ class Timeline {
                     .style('z-index', 100000)
                     .html(`<div class="tooltip-label">Year: ${d.year}<br>Count: ${d.specimenCount}</div>`)
             })
-            .on('mousemove', function (event) {
+            .on('mousemove', function(event) {
                 d3.select('#timelineTooltip')
                     .style('left', (event.pageX + 10) + 'px')
                     .style('top', (event.pageY + 10) + 'px');
             })
-            .on('mouseleave', function (event, d) {
+            .on('mouseleave', function(event, d) {
                 d3.select(this)
                     .transition()
                     .duration(150)

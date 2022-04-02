@@ -11,41 +11,62 @@
 </head>
 
 <body>
+
     <div id="mapContainer" class="mapContainer">
         <div id="map"></div>
         <div id="tooltip" class="tooltip"></div>
-        <div class="infoContainer">
-            <div id="buttonContainer" class="buttonContainer">
-                <label class="button">
-                    <input type="radio" name="colorScale" value="year" id="yearButton" checked>
-                    <span>Year</span>
-                </label>
-
-                <label class="button">
-                    <input type="radio" name="colorScale" value="startDay" id="startDayButton">
-                    <span>Start Day of Year</span>
-                </label>
-
-                <label class="button">
-                    <input type="radio" name="colorScale" value="phylum" id="classButton">
-                    <span>Phylum</span>
-                </label>
-            </div>
-            <svg id="mapLegend" class="legend"></svg>
-        </div>
     </div>
 
-    <svg id="timeline" style="width: 100%"></svg>
-    <div id="timelineTooltip" class="tooltip"></div>
-    <div id="chartContainer">
-        <svg id="monthBarChart"></svg>
-        <div id="monthTooltip" class="tooltip"></div>
-        <svg id="phylumBarChart"></svg>
-        <div id="phylumTooltip" class="tooltip"></div>
-        <svg id="collectorBarChart"></svg>
-        <div id="collectorTooltip" class="tooltip"></div>
-        <svg id="missingDataChart"></svg>
-        <div id="missingTooltip"></div>
+    <div class="key" style="text-align:center; margin: auto;">
+        <h2>Sort collection by:</h2>
+        <div id="buttonContainer" class="buttonContainer">
+            <label class="button">
+                <input type="radio" name="colorScale" value="year" id="yearButton" checked>
+                <span>Year</span>
+            </label>
+
+            <label class="button">
+                <input type="radio" name="colorScale" value="startDay" id="startDayButton">
+                <span>Day of Year</span>
+            </label>
+
+            <label class="button">
+                <input type="radio" name="colorScale" value="phylum" id="classButton">
+                <span>Phylum</span>
+            </label>
+        </div>
+
+        <svg id="mapLegend" class="legend"></svg>
+    </div>
+
+    <div id="tl">
+        <h2>Timeline showing the collection totals per year (1859 - 2017)</h3>
+            <svg id="timeline" style="width: 100%;"></svg>
+            <div id="timelineTooltip" class="tooltip"></div>
+    </div>
+
+    <div id="chartContainer" class="flexbox-container">
+        <div class="flexbox-item flexbox-item-1">
+            <h2>Bar chart showing the collection totals per year (1859 - 2017)</h2>
+            <svg id="monthBarChart"></svg>
+            <div id="monthTooltip" class="tooltip"></div>
+        </div>
+        <div class="flexbox-item flexbox-item-2">
+            <h2>Bar chart showing the number of specimen collected per phylum (1859 - 2017)</h2>
+            <svg id="phylumBarChart"></svg>
+            <div id="phylumTooltip" class="tooltip"></div>
+        </div>
+        <div class="flexbox-item flexbox-item-3">
+            <h2>Bar chart showing the number of specimen collected per collector (1859 - 2017)</h2>
+            <svg id="collectorBarChart"></svg>
+            <div id="collectorTooltip" class="tooltip"></div>
+        </div>
+        <div class="flexbox-item flexbox-item-4">
+            <h2>Bar chart showing the amount of missing data by data type (1859 - 2017)</h2>
+            <svg id="missingDataChart"></svg>
+            <div id="missingTooltip"></div>
+        </div>
+
     </div>
 
     <script src="js/d3.v6.min.js"></script>
