@@ -128,9 +128,6 @@ class missingDataChart {
     updateChart(newData, enabled) {
         let vis = this;
 
-        vis.yScale.domain([0, d3.max(newData, d => d.missing)]);
-        vis.yAxisG.call(vis.yAxis);
-
         vis.svg.selectAll('rect')
             .data(newData)
             .transition().duration(1000)

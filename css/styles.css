@@ -26,7 +26,7 @@
 .buttonContainer {
     display: flex;
     padding: 10px;
-    justify-content: space-around;
+    justify-content: center;
 }
 
 .button {
@@ -108,7 +108,6 @@ h2 {
 .flexbox-item-2,
 .flexbox-item-3,
 .flexbox-item-4 {
-    position: relative;
     max-width: 500px;
     min-height: 300px;
     max-height: 350px;

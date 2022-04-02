@@ -143,6 +143,31 @@ d3.csv('data/formatted.csv')
 
         let missingChart = new missingDataChart({ parentElement: '#missingDataChart' }, missingData);
 
+        let resetButton = document.getElementById('resetButton');
+
+        resetButton.addEventListener('click', () => {
+            for (let filter in filters) {
+                filters[filter] = [];
+            }
+
+            let mapData = prepareMapData(data, filters);
+            let monthData = prepareMonthData(data, filters);
+            let phylumData = preparePhylumData(data, filters);
+            let collectorData = prepareRecorderData(data, filters);
+            let missingData = prepareMissingData(data, filters);
+
+            let enabled = true;
+
+            d3.selectAll('.on')
+                .attr('class', 'off');
+
+            map.updateChart(mapData);
+            monthChart.updateChart(monthData, enabled);
+            phylumChart.updateChart(phylumData, enabled);
+            collectorChart.updateChart(collectorData, enabled);
+            missingChart.updateChart(missingData, enabled);
+        });
+
         document.addEventListener('timelineFilter', (event) => {
             let startYear = event.detail.begin;
             let endYear = event.detail.end;
