@@ -118,6 +118,7 @@ class Timeline {
         vis.yScaleFocus.domain([0, d3.max(vis.data, d => d.specimenCount)]);
         vis.xScaleContext.domain(vis.xScaleFocus.domain());
         vis.yScaleContext.domain(vis.yScaleFocus.domain());
+        vis.xAxisFocus.tickValues(vis.xScaleFocus.domain().filter(function(d,i){ return !(i%5)}));
 
         vis.renderVis();
     }
@@ -199,6 +200,11 @@ class Timeline {
             vis.xScaleFocus.domain(vis.xScaleContext.domain());
         }
 
+        if (vis.xScaleFocus.domain().length < 10) {
+            vis.xAxisFocus.tickValues(vis.xScaleFocus.domain().filter(function(d,i){ return !(i%1)}))
+        } else {
+            vis.xAxisFocus.tickValues(vis.xScaleFocus.domain().filter(function(d,i){ return !(i%5)}))
+        }
         vis.xAxisFocusG.call(vis.xAxisFocus);
 
         vis.focusBar.attr('x', d => vis.xScaleFocus(d.year));
@@ -222,6 +228,11 @@ class Timeline {
         if (!sourceEvent) return;
         if (!selection) {
             vis.xScaleFocus.domain(vis.xScaleContext.domain());
+            if (vis.xScaleFocus.domain().length < 10) {
+                vis.xAxisFocus.tickValues(vis.xScaleFocus.domain().filter(function(d,i){ return !(i%1)}))
+            } else {
+                vis.xAxisFocus.tickValues(vis.xScaleFocus.domain().filter(function(d,i){ return !(i%5)}))
+            }
             vis.xAxisFocusG.call(vis.xAxisFocus);
 
             vis.focusBar

@@ -6,7 +6,8 @@ d3.csv('data/formatted.csv')
             months: [],
             phyla: [],
             collectors: [],
-            missingData: []
+            missingData: [],
+            years: []
         };
 
         let data = _data;
